@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7Lab - Creative Event Organizer</title>
+    <meta name="description" content="7Lab adalah event organizer yang menggabungkan kreativitas dan pengalaman untuk menghadirkan energi yang seru dan berkesan.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Montserrat', 'sans-serif'],
+                        body: ['Open Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            900: '#0f1011',
+                            800: '#1a1c1d',
+                            700: '#2a2d2f',
+                        },
+                        light: {
+                            50: '#fcfcfc',
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base animations & utilities */
+        .fade-in-up { opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-in-left { opacity: 0; transform: translateX(-40px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-in-right { opacity: 0; transform: translateX(40px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-in-up.visible, .fade-in-left.visible, .fade-in-right.visible { opacity: 1; transform: translate(0, 0); }
+
+        /* Glassmorphism Header */
+        header.scrolled {
+            background-color: rgba(15, 16, 17, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        /* Blur Text Effect */
+        .blur-text-effect { text-shadow: 0 4px 40px rgba(255, 255, 255, 0.15); }
+
+        /* Scrollbar Customization */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f1011; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+        /* Language Toggle */
+        .lang-btn { transition: all 0.3s ease; color: rgba(255,255,255,0.5); }
+        .lang-btn.active { background: #ffffff; color: #0f1011; }
+
+        /* Marquee */
+        .marquee-container { overflow: hidden; position: relative; width: 100%; }
+        .marquee-container::before, .marquee-container::after {
+            content: ''; position: absolute; top: 0; width: 60px; height: 100%; z-index: 2; pointer-events: none;
+        }
+        @media (min-width: 768px) {
+            .marquee-container::before, .marquee-container::after { width: 100px; }
+        }
+        .marquee-container::before { left: 0; background: linear-gradient(to right, #fcfcfc, transparent); }
+        .marquee-container::after { right: 0; background: linear-gradient(to left, #fcfcfc, transparent); }
+        .marquee-track { display: flex; animation: marquee 25s linear infinite; width: max-content; }
+        .marquee-container:hover .marquee-track { animation-play-state: paused; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-logo { filter: grayscale(100%) opacity(0.7); transition: all 0.4s ease; }
+        .marquee-logo:hover { filter: grayscale(0%) opacity(1); }
+
+        /* Gallery Carousel */
+        .gallery-carousel { position: relative; overflow: hidden; border-radius: 0.5rem; }
+        .gallery-track { display: flex; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .gallery-slide { flex: 0 0 100%; width: 100%; position: relative; }
+        .gallery-slide img { width: 100%; height: 250px; object-fit: cover; }
+        @media (min-width: 640px) { .gallery-slide img { height: 350px; } }
+        @media (min-width: 1024px) { .gallery-slide img { height: 500px; } }
+
+        .gallery-btn {
+            position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px;
+            border-radius: 50%; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; font-size: 16px;
+            cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; z-index: 3;
+        }
+        @media (min-width: 768px) {
+            .gallery-btn { width: 48px; height: 48px; font-size: 18px; }
+        }
+        .gallery-btn:hover { background: #fff; color: #000; transform: translateY(-50%) scale(1.1); }
+        .gallery-btn.prev { left: 8px; }
+        .gallery-btn.next { right: 8px; }
+        @media (min-width: 768px) {
+            .gallery-btn.prev { left: 16px; }
+            .gallery-btn.next { right: 16px; }
+        }
+        .gallery-dots { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); border: none; cursor: pointer; transition: all 0.3s ease; }
+        @media (min-width: 768px) { .gallery-dot { width: 10px; height: 10px; } }
+        .gallery-dot.active { background: #fff; transform: scale(1.3); }
+
+        /* Form Inputs */
+        .form-input {
+            background: #ffffff; border: 1px solid #e5e7eb; transition: all 0.3s ease; color: #0f1011;
+        }
+        .form-input:focus { outline: none; border-color: #0f1011; box-shadow: 0 0 0 2px rgba(15, 16, 17, 0.1); }
+        .form-input::placeholder { color: #9ca3af; }
+    </style>
+</head>
+
+<body class="font-body text-light-50 bg-dark-900 antialiased overflow-x-hidden selection:bg-white selection:text-black">
+
+    <!-- ===== HEADER ===== -->
+    <header id="site-header" class="fixed w-full top-0 z-[60] transition-all duration-300 py-4 md:py-6 px-6 md:px-12 flex justify-between items-center text-white">
+        <a href="#home" class="flex items-center gap-3 group">
+            <img src="public/images/7lab logo.jpg" alt="7Lab Logo" class="h-8 md:h-10 w-auto rounded-lg transition-transform group-hover:scale-105" onerror="this.src='https://via.placeholder.com/40x40/ffffff/000000?text=7L'" />
+            <span class="font-heading font-bold tracking-widest text-sm uppercase hidden sm:block">7Lab</span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden lg:flex items-center gap-8 text-sm font-heading font-semibold tracking-wide uppercase">
+            <a href="#home" class="hover:text-gray-300 transition-colors" data-lang-en="Home" data-lang-id="Beranda">Beranda</a>
+            <a href="#about" class="hover:text-gray-300 transition-colors" data-lang-en="About" data-lang-id="Tentang">Tentang</a>
+            <a href="#services" class="hover:text-gray-300 transition-colors" data-lang-en="Services" data-lang-id="Layanan">Layanan</a>
+            <a href="#collaborations" class="hover:text-gray-300 transition-colors" data-lang-en="Collaborations" data-lang-id="Kolaborasi">Kolaborasi</a>
+            <a href="#gallery" class="hover:text-gray-300 transition-colors" data-lang-en="Gallery" data-lang-id="Galeri">Galeri</a>
+        </nav>
+
+        <div class="hidden lg:flex items-center gap-6">
+            <!-- Language Toggle -->
+            <div class="flex items-center gap-1 bg-white/10 rounded-full p-1 border border-white/20">
+                <button class="lang-btn px-3 py-1 rounded-full text-xs font-bold" onclick="setLang('en')">EN</button>
+                <button class="lang-btn active px-3 py-1 rounded-full text-xs font-bold" onclick="setLang('id')">ID</button>
+            </div>
+            <a href="#contact" class="border border-white px-6 py-2 rounded-full text-sm font-heading font-semibold hover:bg-white hover:text-black transition-all" data-lang-en="Contact Us" data-lang-id="Hubungi Kami">
+                Hubungi Kami
+            </a>
+        </div>
+
+        <!-- Mobile Menu Toggle (Hamburger) -->
+        <button id="mobile-menu-btn" class="lg:hidden relative z-[70] text-2xl focus:outline-none">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- ===== MOBILE MENU ===== -->
+    <div id="mobile-menu" class="fixed inset-0 bg-dark-900 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 z-[100]">
+        <!-- Tombol Close (X) -->
+        <button id="mobile-close-btn" class="absolute top-6 right-6 text-3xl text-white focus:outline-none">
+            <i class="fa-solid fa-times"></i>
+        </button>
+
+        <nav class="flex flex-col items-center gap-6 md:gap-8 text-xl font-heading font-bold uppercase">
+            <a href="#home" class="mobile-link" data-lang-en="Home" data-lang-id="Beranda">Beranda</a>
+            <a href="#about" class="mobile-link" data-lang-en="About" data-lang-id="Tentang">Tentang</a>
+            <a href="#services" class="mobile-link" data-lang-en="Services" data-lang-id="Layanan">Layanan</a>
+            <a href="#collaborations" class="mobile-link" data-lang-en="Collaborations" data-lang-id="Kolaborasi">Kolaborasi</a>
+            <a href="#gallery" class="mobile-link" data-lang-en="Gallery" data-lang-id="Galeri">Galeri</a>
+
+            <div class="flex items-center gap-2 mt-4 bg-white/10 rounded-full p-1 border border-white/20">
+                <button class="lang-btn px-4 py-2 rounded-full text-sm font-bold" onclick="setLang('en')">EN</button>
+                <button class="lang-btn active px-4 py-2 rounded-full text-sm font-bold" onclick="setLang('id')">ID</button>
+            </div>
+
+            <a href="#contact" class="mobile-link border border-white px-8 py-3 rounded-full mt-4 text-sm" data-lang-en="Contact Us" data-lang-id="Hubungi Kami">Hubungi Kami</a>
+        </nav>
+    </div>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section id="home" class="relative min-h-screen flex items-center pt-28 md:pt-32 pb-12 overflow-hidden px-6 md:px-12">
+
+        <!-- BACKGROUND VIDEO -->
+        <div class="absolute inset-0 z-0 bg-dark-900">
+            <!-- Ganti src di bawah ini dengan link video Anda (misal: public/videos/hero-bg.mp4) -->
+            <video autoplay loop muted playsinline class="w-full h-full object-cover absolute inset-0 opacity-70">
+                <source src="public/videos/hero-video.mp4" type="video/mp4">
+                Browser Anda tidak mendukung tag video.
+            </video>
+
+            <!-- Overlay gradasi hitam agar teks tetap terbaca jelas -->
+            <div class="absolute inset-0 bg-black/50 bg-gradient-to-t from-dark-900 via-dark-900/40 to-transparent"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto w-full flex flex-col gap-6 fade-in-up">
+            <p class="font-heading text-xs sm:text-sm md:text-base font-bold text-gray-300 uppercase tracking-[0.2em]" data-lang-en="HELLO! WE ARE . . ." data-lang-id="HALO! KAMI ADALAH . . .">HALO! KAMI ADALAH . . .</p>
+            <h1 class="font-heading text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black uppercase leading-tight tracking-tight">
+                <span data-lang-en="Creative" data-lang-id="Kreatif">Kreatif</span><br>
+                <span data-lang-en="Event Organizer" data-lang-id="Event Organizer">Event Organizer</span><br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-500" data-lang-en="& Experience Creator" data-lang-id="& Pencipta Pengalaman">& Pencipta Pengalaman</span>
+            </h1>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mt-6 md:mt-8 gap-8">
+                <div>
+                    <h2 class="font-heading text-lg sm:text-xl md:text-2xl font-bold mb-3 italic">Sport Event • Live Music • Event Production • Brand Activation</h2>
+                    <p class="max-w-xl text-gray-300 text-base sm:text-lg md:text-xl font-light leading-relaxed" data-lang-en="7Lab is an event organizer that combines creativity and experience to deliver exciting and memorable energy." data-lang-id="7Lab adalah event organizer yang menggabungkan kreativitas dan pengalaman untuk menghadirkan energi yang seru dan berkesan.">7Lab adalah event organizer yang menggabungkan kreativitas dan pengalaman untuk menghadirkan energi yang seru dan berkesan.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-shrink-0 w-full md:w-auto">
+                    <a href="#contact" class="inline-flex items-center justify-center gap-3 bg-white text-black px-6 sm:px-8 py-4 font-heading font-bold uppercase text-xs sm:text-sm hover:bg-gray-200 transition-colors w-full sm:w-auto">
+                        <i class="fa-solid fa-envelope"></i> <span data-lang-en="Contact Us" data-lang-id="Hubungi Kami">Hubungi Kami</span>
+                    </a>
+                    <a href="#services" class="inline-flex items-center justify-center gap-3 border border-white px-6 sm:px-8 py-4 font-heading font-bold uppercase text-xs sm:text-sm hover:bg-white hover:text-black transition-colors w-full sm:w-auto">
+                        <i class="fa-solid fa-arrow-down"></i> <span data-lang-en="View Services" data-lang-id="Lihat Layanan">Lihat Layanan</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TRUST BAR ===== -->
+    <section id="trust-bar" class="bg-light-50 text-black py-10 md:py-12 border-b border-gray-200 px-4 md:px-12">
+        <div class="max-w-7xl mx-auto">
+            <p class="text-center font-heading font-bold text-xs tracking-[0.2em] md:tracking-[0.3em] uppercase text-gray-500 mb-6 md:mb-8" data-lang-en="What You'll Get Here" data-lang-id="Apa Yang Kami Tawarkan">Apa Yang Kami Tawarkan</p>
+            <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-12 font-heading font-bold text-base sm:text-xl md:text-3xl lg:text-4xl px-2 fade-in-up text-center">
+                <span data-lang-en="Creative Events" data-lang-id="Event Kreatif">Event Kreatif</span>
+                <span class="hidden sm:block w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-black"></span>
+                <span data-lang-en="Live Music" data-lang-id="Musik Live">Musik Live</span>
+                <span class="hidden sm:block w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-black"></span>
+                <span data-lang-en="Sport Events" data-lang-id="Event Olahraga">Event Olahraga</span>
+                <span class="hidden sm:block w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-black"></span>
+                <span data-lang-en="Brand Activation" data-lang-id="Aktivasi Brand">Aktivasi Brand</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== ABOUT SECTION ===== -->
+    <section id="about" class="bg-light-50 text-black py-16 md:py-24 px-6 md:px-12 overflow-hidden relative">
+        <div class="absolute bottom-0 left-0 w-full h-1/2 opacity-10 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #fff 25%, #fff 75%, #000 75%, #000); background-position: 0 0, 10px 10px; background-size: 20px 20px;"></div>
+
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="text-center mb-12 md:mb-16 fade-in-up">
+                <h2 class="font-heading text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black uppercase text-dark-900 tracking-tighter" data-lang-en="About Us" data-lang-id="Tentang Kami">Tentang Kami</h2>
+            </div>
+
+            <div class="flex flex-col gap-10 fade-in-up bg-white p-6 sm:p-8 md:p-12 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100">
+                <div class="relative">
+                    <div class="w-16 h-1 bg-black mb-6 md:mb-8"></div>
+                    <p class="text-lg sm:text-xl md:text-2xl font-bold leading-relaxed mb-6" data-lang-en="7Lab is an event organizer that combines creativity and experience to deliver exciting and memorable energy." data-lang-id="7Lab adalah event organizer yang menggabungkan kreativitas dan pengalaman untuk menghadirkan energi yang seru dan berkesan.">
+                        7Lab adalah event organizer yang menggabungkan kreativitas dan pengalaman untuk menghadirkan energi yang seru dan berkesan.
+                    </p>
+                    <p class="text-gray-600 text-base md:text-lg leading-relaxed" data-lang-en="We are dedicated to providing the best service in every project, from sports events and live music to brand activations and weddings. Our diverse range of top-notch production services meet all your creative needs. Our talented team is equipped with the skills and expertise to bring your vision to life." data-lang-id="Kami berdedikasi untuk memberikan layanan terbaik dalam setiap proyek, mulai dari acara olahraga, musik live, hingga aktivasi merek dan pernikahan. Beragam layanan produksi terbaik kami memenuhi semua kebutuhan kreatif Anda. Tim berbakat kami dilengkapi dengan keterampilan dan keahlian untuk mewujudkan visi Anda.">
+                        Kami berdedikasi untuk memberikan layanan terbaik dalam setiap proyek, mulai dari acara olahraga, musik live, hingga aktivasi merek dan pernikahan. Beragam layanan produksi terbaik kami memenuhi semua kebutuhan kreatif Anda. Tim berbakat kami dilengkapi dengan keterampilan dan keahlian untuk mewujudkan visi Anda.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-gray-200 pt-8 md:pt-10">
+                    <div>
+                        <h3 class="font-heading font-bold uppercase text-xs tracking-[0.2em] text-gray-500 mb-4 md:mb-6" data-lang-en="Why Choose Us" data-lang-id="Mengapa Memilih Kami">Mengapa Memilih Kami</h3>
+                        <ul class="space-y-3 md:space-y-4 font-heading font-bold text-base md:text-lg">
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-dark-900"></i> <span data-lang-en="High-energy experience" data-lang-id="Pengalaman penuh energi">Pengalaman penuh energi</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-dark-900"></i> <span data-lang-en="Creative & innovative" data-lang-id="Kreatif & inovatif">Kreatif & inovatif</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-dark-900"></i> <span data-lang-en="Professional production" data-lang-id="Produksi profesional">Produksi profesional</span></li>
+                            <li class="flex items-center gap-3"><i class="fa-solid fa-check text-dark-900"></i> <span data-lang-en="Trusted by brands" data-lang-id="Dipercaya oleh berbagai brand">Dipercaya oleh berbagai brand</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-bold uppercase text-xs tracking-[0.2em] text-gray-500 mb-4 md:mb-6" data-lang-en="Follow Our Journey" data-lang-id="Ikuti Perjalanan Kami">Ikuti Perjalanan Kami</h3>
+                        <div class="flex flex-col gap-3 font-heading font-bold text-lg md:text-xl uppercase">
+                            <a href="https://instagram.com/7lab_aio" target="_blank" class="border-b border-gray-300 pb-2 hover:text-gray-500 transition-colors w-fit">Instagram</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SERVICES SECTION ===== -->
+    <section id="services" class="bg-light-100 text-black py-16 md:py-24 px-6 md:px-12 text-center">
+        <div class="max-w-7xl mx-auto">
+            <div class="fade-in-up">
+                <h2 class="font-heading text-3xl sm:text-4xl md:text-5xl font-black uppercase mb-4" data-lang-en="Main Services" data-lang-id="Layanan Utama">Layanan Utama</h2>
+                <p class="font-heading font-bold text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.2em] text-gray-500 uppercase mb-12 md:mb-16" data-lang-en="Because some stories are meant to be seen and heard." data-lang-id="Karena beberapa cerita layak untuk dilihat dan didengar.">Karena beberapa cerita layak untuk dilihat dan didengar.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 text-left">
+                <!-- Service 1 -->
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-transform duration-300 fade-in-up">
+                    <i class="fa-solid fa-trophy text-3xl md:text-4xl mb-5 md:mb-6 text-dark-900"></i>
+                    <h3 class="font-heading font-bold text-lg md:text-xl mb-3">SPORT EVENT</h3>
+                    <p class="text-sm text-gray-600 mb-2" data-lang-en="Managing and organizing competitive and spirited sports events." data-lang-id="Mengelola dan menyelenggarakan acara olahraga yang kompetitif dan penuh semangat.">Mengelola dan menyelenggarakan acara olahraga yang kompetitif dan penuh semangat.</p>
+                </div>
+                <!-- Service 2 -->
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-transform duration-300 fade-in-up" style="transition-delay: 100ms;">
+                    <i class="fa-solid fa-music text-3xl md:text-4xl mb-5 md:mb-6 text-dark-900"></i>
+                    <h3 class="font-heading font-bold text-lg md:text-xl mb-3">LIVE MUSIC & BAND</h3>
+                    <p class="text-sm text-gray-600 mb-2" data-lang-en="Delivering live music performances with the best sound quality and experience." data-lang-id="Menghadirkan pertunjukan musik live dengan kualitas suara dan pengalaman terbaik.">Menghadirkan pertunjukan musik live dengan kualitas suara dan pengalaman terbaik.</p>
+                </div>
+                <!-- Service 3 -->
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-transform duration-300 fade-in-up" style="transition-delay: 200ms;">
+                    <i class="fa-solid fa-lightbulb text-3xl md:text-4xl mb-5 md:mb-6 text-dark-900"></i>
+                    <h3 class="font-heading font-bold text-lg md:text-xl mb-3">LIGHTING & EVENT PRODUCTION</h3>
+                    <p class="text-sm text-gray-600 mb-2" data-lang-en="Professional lighting and event production for the perfect ambiance." data-lang-id="Tata cahaya dan produksi acara yang profesional untuk suasana yang sempurna.">Tata cahaya dan produksi acara yang profesional untuk suasana yang sempurna.</p>
+                </div>
+                <!-- Service 4 -->
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-transform duration-300 fade-in-up" style="transition-delay: 300ms;">
+                    <i class="fa-solid fa-bullseye text-3xl md:text-4xl mb-5 md:mb-6 text-dark-900"></i>
+                    <h3 class="font-heading font-bold text-lg md:text-xl mb-3">EVENT & BRAND ACTIVATION</h3>
+                    <p class="text-sm text-gray-600 mb-2" data-lang-en="Creative and interactive brand activation for maximum engagement." data-lang-id="Aktivasi brand yang kreatif dan interaktif untuk engagement maksimal.">Aktivasi brand yang kreatif dan interaktif untuk engagement maksimal.</p>
+                </div>
+                <!-- Service 5 -->
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-transform duration-300 fade-in-up" style="transition-delay: 400ms;">
+                    <i class="fa-solid fa-heart text-3xl md:text-4xl mb-5 md:mb-6 text-dark-900"></i>
+                    <h3 class="font-heading font-bold text-lg md:text-xl mb-3">WEDDING</h3>
+                    <p class="text-sm text-gray-600 mb-2" data-lang-en="Planning and managing your dream wedding with a personal touch." data-lang-id="Merencanakan dan mengelola pernikahan impian Anda dengan sentuhan personal.">Merencanakan dan mengelola pernikahan impian Anda dengan sentuhan personal.</p>
+                </div>
+                <!-- CTA Card -->
+                <div class="bg-dark-900 text-white p-6 md:p-8 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-2 transition-transform duration-300 flex flex-col items-center justify-center text-center fade-in-up" style="transition-delay: 500ms;">
+                    <h3 class="font-heading text-lg md:text-xl font-bold mb-3" data-lang-en="Ready to Collaborate?" data-lang-id="Siap Berkolaborasi?">Siap Berkolaborasi?</h3>
+                    <p class="text-gray-400 text-sm mb-6" data-lang-en="Let's bring your dream event to life together." data-lang-id="Mari wujudkan event impianmu bersama kami.">Mari wujudkan event impianmu bersama kami.</p>
+                    <a href="#contact" class="bg-white text-black px-6 py-2.5 rounded-full text-xs sm:text-sm font-heading font-bold uppercase hover:bg-gray-200 transition-colors" data-lang-en="Contact Us" data-lang-id="Hubungi Kami">Hubungi Kami</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SIGNATURE EXPERIENCE ===== -->
+    <section class="bg-dark-900 text-white py-20 md:py-32 px-6 md:px-12 relative overflow-hidden flex items-center justify-center text-center">
+        <div class="absolute inset-0 z-0 bg-dark-800">
+            <div class="w-full h-full border-4 border-dashed border-gray-700 flex flex-col items-center justify-center text-gray-600 opacity-20 p-4">
+                <i class="fa-solid fa-video text-6xl md:text-8xl mb-4"></i>
+                <span class="font-heading font-bold text-lg md:text-xl uppercase tracking-widest">Event Highlight Video</span>
+            </div>
+            <div class="absolute inset-0 bg-black/70"></div>
+        </div>
+
+        <div class="relative z-10 max-w-4xl mx-auto fade-in-up">
+            <h3 class="font-heading font-bold text-xs sm:text-sm tracking-[0.2em] sm:tracking-[0.3em] uppercase text-gray-400 mb-4 md:mb-6" data-lang-en="Creativity & Experience" data-lang-id="Kreativitas & Pengalaman">Kreativitas & Pengalaman</h3>
+            <h2 class="font-heading text-4xl sm:text-5xl md:text-7xl font-black uppercase mb-4 md:mb-6 leading-tight blur-text-effect" data-lang-en="Unforgettable Experiences" data-lang-id="Pengalaman Tak Terlupakan">Pengalaman Tak Terlupakan</h2>
+            <p class="text-lg sm:text-xl md:text-2xl font-light text-gray-300" data-lang-en="Delivering exciting and memorable energy in every moment of your event." data-lang-id="Menghadirkan energi yang seru dan berkesan di setiap momen acara Anda.">Menghadirkan energi yang seru dan berkesan di setiap momen acara Anda.</p>
+            <a href="#contact" class="mt-8 md:mt-10 inline-flex items-center gap-3 border border-white px-6 md:px-8 py-3 md:py-4 font-heading font-bold uppercase text-xs sm:text-sm hover:bg-white hover:text-black transition-colors rounded-full">
+                <i class="fa-solid fa-play"></i> <span data-lang-en="Let's Create Yours" data-lang-id="Mari Ciptakan Milik Anda">Mari Ciptakan Milik Anda</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== GALLERY CAROUSEL SECTION ===== -->
+    <section id="gallery" class="bg-dark-900 text-white py-16 md:py-24 px-4 sm:px-6 md:px-12">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12 md:mb-16 fade-in-up">
+                <h2 class="font-heading text-4xl sm:text-5xl md:text-7xl font-black uppercase mb-4" data-lang-en="Our Gallery" data-lang-id="Galeri Kami">Galeri Kami</h2>
+                <p class="font-heading font-bold text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.2em] text-gray-400 uppercase" data-lang-en="A glimpse of the energy we create." data-lang-id="Sekilas tentang energi yang kami ciptakan.">Sekilas tentang energi yang kami ciptakan.</p>
+            </div>
+
+            <div class="gallery-carousel border-2 border-dashed border-gray-600 bg-dark-800 p-1 sm:p-2 fade-in-up" id="galleryCarousel">
+                <div class="w-full overflow-hidden rounded-lg">
+                    <div class="gallery-track" id="galleryTrack">
+                        <div class="gallery-slide rounded-lg overflow-hidden">
+                            <img src="public/images/gallery of previous event/1.png" alt="Event Gallery 1" onerror="this.src='https://via.placeholder.com/1200x500/1a1c1d/ffffff?text=Gallery+Image+1'" />
+                        </div>
+                        <div class="gallery-slide rounded-lg overflow-hidden">
+                            <img src="public/images/gallery of previous event/2.png" alt="Event Gallery 2" onerror="this.src='https://via.placeholder.com/1200x500/1a1c1d/ffffff?text=Gallery+Image+2'" />
+                        </div>
+                    </div>
+                </div>
+                <!-- Navigation buttons -->
+                <button class="gallery-btn prev" onclick="galleryPrev()" aria-label="Previous slide">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="gallery-btn next" onclick="galleryNext()" aria-label="Next slide">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+            <!-- Dots -->
+            <div class="gallery-dots" id="galleryDots"></div>
+        </div>
+    </section>
+
+    <!-- ===== COLLABORATIONS & MARQUEE SECTION ===== -->
+    <section id="collaborations" class="bg-light-50 text-black py-16 md:py-24 px-6 md:px-12 border-t border-gray-200 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-10 md:mb-16 fade-in-up">
+                <h2 class="font-heading text-3xl sm:text-4xl md:text-5xl font-black uppercase mb-4" data-lang-en="Experience & Collaborations" data-lang-id="Pengalaman & Kolaborasi">Pengalaman & Kolaborasi</h2>
+                <p class="font-heading font-bold text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.2em] text-gray-500 uppercase" data-lang-en="Selected Collaborations" data-lang-id="Kolaborasi Terpilih">Kolaborasi Terpilih</p>
+            </div>
+
+            <p class="text-base sm:text-lg text-center text-gray-600 max-w-3xl mx-auto mb-12 md:mb-16 fade-in-up" data-lang-en="We have collaborated on various event projects with brands, communities, and creative partners." data-lang-id="Kami telah berkolaborasi dalam berbagai proyek event bersama brand, komunitas, dan partner kreatif.">
+                Kami telah berkolaborasi dalam berbagai proyek event bersama brand, komunitas, dan partner kreatif.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16 items-center">
+                <div class="lg:col-span-12 fade-in-up">
+                    <h3 class="font-heading font-bold text-xl sm:text-2xl uppercase mb-6 md:mb-8 text-center" data-lang-en="Our Collaborators"
+                      data-lang-id="Kolaborator Kami">Kolaborator Kami</h3>
+
+                    <div class="marquee-container py-4">
+                        <div class="marquee-track">
+                            <!-- First set of logos -->
+                            <div class="flex items-center gap-4 sm:gap-6 md:gap-8 px-2 sm:px-4">
+                                <div class="flex-shrink-0 w-28 sm:w-32 md:w-40 h-16 sm:h-20 md:h-24 flex items-center justify-center bg-white border border-gray-200 rounded-xl p-3 md:p-4 shadow-sm">
+                                    <img src="public/images/collab brand logos/logo 1.jpg" alt="Partner Logo 1" class="marquee-logo max-h-10 md:max-h-16 max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150x60/ffffff/000000?text=LOGO+1'" />
+                                </div>
+                                <div class="flex-shrink-0 w-28 sm:w-32 md:w-40 h-16 sm:h-20 md:h-24 flex items-center justify-center bg-white border border-gray-200 rounded-xl p-3 md:p-4 shadow-sm">
+                                    <img src="public/images/collab brand logos/logo 2.jpg" alt="Partner Logo 2" class="marquee-logo max-h-10 md:max-h-16 max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150x60/ffffff/000000?text=LOGO+2'" />
+                                </div>
+                                <div class="flex-shrink-0 w-28 sm:w-32 md:w-40 h-16 sm:h-20 md:h-24 flex items-center justify-center bg-white border border-gray-200 rounded-xl p-3 md:p-4 shadow-sm">
+                                    <img src="public/images/collab brand logos/logo 3.jpg" alt="Partner Logo 3" class="marquee-logo max-h-10 md:max-h-16 max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150x60/ffffff/000000?text=LOGO+3'" />
+                                </div>
+                                <div class="flex-shrink-0 w-28 sm:w-32 md:w-40 h-16 sm:h-20 md:h-24 flex items-center justify-center bg-white border border-gray-200 rounded-xl p-3 md:p-4 shadow-sm">
+                                    <img src="public/images/collab brand logos/logo 4.png" alt="Partner Logo 4" class="marquee-logo max-h-10 md:max-h-16 max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150x60/ffffff/000000?text=LOGO+4'" />
+                                </div>
+                            </div>
+                            <!-- Duplicate set for seamless loop -->
+                            <div class="flex items-center gap-4 sm:gap-6 md:gap-8 px-2 sm:px-4">
+                                <div class="flex-shrink-0 w-28 sm:w-32 md:w-40 h-16 sm:h-20 md:h-24 flex items-center justify-center bg-white border border-gray-200 rounded-xl p-3 md:p-4 shadow-sm">
+                                    <img src="public/images/collab brand logos/logo 1.jpg" alt="Partner Logo 1" class="marquee-logo max-h-10 md:max-h-16 max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150x60/ffffff/000000?text=LOGO+1'" />
+                                </div>
+                                <div class="flex-shrink-0 w-28 sm:w-32 md:w-40 h-16 sm:h-20 md:h-24 flex items-center justify-center bg-white border border-gray-200 rounded-xl p-3 md:p-4 shadow-sm">
+                                    <img src="public/images/collab brand logos/logo 2.jpg" alt="Partner Logo 2" class="marquee-logo max-h-10 md:max-h-16 max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150x60/ffffff/000000?text=LOGO+2'" />
+                                </div>
+                                <div class="flex-shrink-0 w-28 sm:w-32 md:w-40 h-16 sm:h-20 md:h-24 flex items-center justify-center bg-white border border-gray-200 rounded-xl p-3 md:p-4 shadow-sm">
+                                    <img src="public/images/collab brand logos/logo 3.jpg" alt="Partner Logo 3" class="marquee-logo max-h-10 md:max-h-16 max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150x60/ffffff/000000?text=LOGO+3'" />
+                                </div>
+                                <div class="flex-shrink-0 w-28 sm:w-32 md:w-40 h-16 sm:h-20 md:h-24 flex items-center justify-center bg-white border border-gray-200 rounded-xl p-3 md:p-4 shadow-sm">
+                                    <img src="public/images/collab brand logos/logo 4.png" alt="Partner Logo 4" class="marquee-logo max-h-10 md:max-h-16 max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150x60/ffffff/000000?text=LOGO+4'" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER / CONTACT SECTION ===== -->
+    <footer id="contact" class="bg-light-100 text-black border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16">
+
+            <!-- Left CTA Message & Socials -->
+            <div class="fade-in-left flex flex-col justify-between">
+                <div>
+                    <h2 class="font-heading text-3xl sm:text-4xl md:text-6xl font-black uppercase text-dark-900 tracking-tighter leading-tight mb-6 md:mb-8" data-lang-en="Let's Create Your <br>Next Event" data-lang-id="Mari Wujudkan <br>Event Anda">
+                        Mari Wujudkan <br>Event Anda
+                    </h2>
+                    <p class="font-heading text-xs sm:text-sm uppercase tracking-widest text-gray-400 mb-8 border-b-2 border-dark-900 w-fit pb-2" data-lang-en="We are ready to help bring your dream event to life." data-lang-id="Kami siap membantu mewujudkan event impian Anda.">
+                        Kami siap membantu mewujudkan event impian Anda.
+                    </p>
+
+                    <div class="mt-8 md:mt-12 mb-10 md:mb-12">
+                        <p class="font-heading font-bold text-xs uppercase text-gray-500 tracking-widest mb-4" data-lang-en="Get In Touch" data-lang-id="Hubungi Kami">Hubungi Kami</p>
+                        <p class="text-lg md:text-xl font-bold mb-2">Bandung, Indonesia</p>
+                        <a href="mailto:manuveraio@gmail.com" class="inline-block mt-2 md:mt-4 font-heading font-bold text-base md:text-lg border-b-2 border-black pb-1 hover:text-gray-600 hover:border-gray-600 transition-colors break-all">
+                            manuveraio@gmail.com
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="https://instagram.com/7lab_aio" target="_blank" class="bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center gap-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 group flex-1">
+                        <div class="w-10 h-10 bg-dark-900 text-white rounded-full flex items-center justify-center flex-shrink-0"><i class="fa-brands fa-instagram"></i></div>
+                        <div>
+                            <p class="font-heading font-bold text-sm">Instagram</p>
+                            <p class="text-xs text-gray-500">@7lab_aio</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Contact Form -->
+            <div class="fade-in-right bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+                <h3 class="font-heading text-xl md:text-2xl font-black uppercase mb-2" data-lang-en="Send a Message" data-lang-id="Kirim Pesan">Kirim Pesan</h3>
+                <p class="text-gray-500 text-xs sm:text-sm mb-6 md:mb-8" data-lang-en="Fill out the form below and we will get back to you shortly." data-lang-id="Isi formulir di bawah dan kami akan segera menghubungi Anda.">Isi formulir di bawah dan kami akan segera menghubungi Anda.</p>
+
+                <form id="contactForm" onsubmit="handleSubmit(event)" class="space-y-4 md:space-y-5">
+                    <div>
+                        <label class="font-heading font-bold text-xs uppercase tracking-wider text-gray-500 mb-2 block" data-lang-en="Full Name *" data-lang-id="Nama Lengkap *">Nama Lengkap *</label>
+                        <input type="text" required class="form-input w-full px-4 py-3 rounded-xl text-sm" placeholder="John Doe" id="formName" />
+                    </div>
+                    <div>
+                        <label class="font-heading font-bold text-xs uppercase tracking-wider text-gray-500 mb-2 block">Email *</label>
+                        <input type="email" required class="form-input w-full px-4 py-3 rounded-xl text-sm" placeholder="john@example.com" id="formEmail" />
+                    </div>
+                    <div>
+                        <label class="font-heading font-bold text-xs uppercase tracking-wider text-gray-500 mb-2 block" data-lang-en="WhatsApp Number" data-lang-id="Nomor WhatsApp">Nomor WhatsApp</label>
+                        <input type="tel" class="form-input w-full px-4 py-3 rounded-xl text-sm" placeholder="+62 812 3456 7890" id="formPhone" />
+                    </div>
+                    <div>
+                        <label class="font-heading font-bold text-xs uppercase tracking-wider text-gray-500 mb-2 block" data-lang-en="Message *" data-lang-id="Pesan *">Pesan *</label>
+                        <textarea required rows="4" class="form-input w-full px-4 py-3 rounded-xl text-sm resize-none" placeholder="..." id="formMessage"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-dark-900 text-white py-4 rounded-xl font-heading font-bold text-sm uppercase tracking-wider hover:bg-dark-700 transition-colors mt-2">
+                        <span data-lang-en="SEND MESSAGE" data-lang-id="KIRIM PESAN">KIRIM PESAN</span>
+                    </button>
+                </form>
+
+                <!-- Success message -->
+                <div id="formSuccess" class="hidden mt-6 p-6 rounded-xl bg-green-50 border border-green-200 text-center">
+                    <i class="fa-solid fa-circle-check text-green-500 text-3xl mb-3"></i>
+                    <p class="text-green-700 font-bold text-sm" data-lang-en="Message sent successfully! We will contact you shortly." data-lang-id="Pesan berhasil dikirim! Kami akan segera menghubungi Anda.">Pesan berhasil dikirim! Kami akan segera menghubungi Anda.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright Bottom -->
+        <div class="border-t border-gray-300 py-6 px-6 md:px-12 flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm font-bold text-gray-500 gap-4 text-center sm:text-left">
+            <div class="flex items-center gap-3">
+                <img src="public/images/7lab logo.jpg" alt="7Lab Logo" class="h-6 w-auto rounded" onerror="this.src='https://via.placeholder.com/24x24/ffffff/000000?text=7L'" />
+                <span>7Lab</span>
+            </div>
+            <p>© 2026 | 7Lab Event Organizer.</p>
+        </div>
+    </footer>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        // ===== MOBILE MENU TOGGLE =====
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileCloseBtn = document.getElementById('mobile-close-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        function openMobileMenu() {
+            mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+            mobileMenu.classList.add('opacity-100', 'pointer-events-auto');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('opacity-100', 'pointer-events-auto');
+            mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = '';
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // ===== STICKY HEADER =====
+        const header = document.getElementById('site-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        if (window.scrollY > 50) header.classList.add('scrolled');
+
+        // ===== INTERSECTION OBSERVER (SCROLL ANIMATIONS) =====
+        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.15 };
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        const animatedElements = document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right');
+        animatedElements.forEach(el => observer.observe(el));
+
+        // ===== DUAL LANGUAGE SUPPORT =====
+        let currentLang = 'id';
+
+        function setLang(lang) {
+            currentLang = lang;
+
+            // Update toggle buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.trim().toLowerCase() === lang) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Update all translatable elements
+            document.querySelectorAll('[data-lang-id][data-lang-en]').forEach(el => {
+                const text = lang === 'id' ? el.getAttribute('data-lang-id') : el.getAttribute('data-lang-en');
+                if (text) {
+                    if(text.includes('<br>')) {
+                        el.innerHTML = text;
+                    } else {
+                        el.textContent = text;
+                    }
+                }
+            });
+
+            document.documentElement.lang = lang;
+        }
+        setLang(currentLang);
+
+        // ===== CONTACT FORM HANDLER =====
+        function handleSubmit(e) {
+            e.preventDefault();
+            const form = document.getElementById('contactForm');
+            const success = document.getElementById('formSuccess');
+
+            // Simulate form submission
+            form.style.display = 'none';
+            success.classList.remove('hidden');
+
+            // Reset after 4 seconds
+            setTimeout(() => {
+                form.reset();
+                form.style.display = '';
+                success.classList.add('hidden');
+            }, 4000);
+        }
+
+        // ===== GALLERY CAROUSEL =====
+        let galleryIndex = 0;
+        const galleryTrack = document.getElementById('galleryTrack');
+        const gallerySlides = galleryTrack ? galleryTrack.querySelectorAll('.gallery-slide') : [];
+        const galleryDotsContainer = document.getElementById('galleryDots');
+        const totalSlides = gallerySlides.length;
+
+        // Create dots
+        if (galleryDotsContainer && totalSlides > 0) {
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+                dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+                dot.addEventListener('click', () => goToSlide(i));
+                galleryDotsContainer.appendChild(dot);
+            }
+        }
+
+        function goToSlide(index) {
+            galleryIndex = index;
+            if (galleryTrack) {
+                galleryTrack.style.transform = `translateX(-${galleryIndex * 100}%)`;
+            }
+            updateDots();
+        }
+
+        function galleryNext() {
+            if(totalSlides === 0) return;
+            galleryIndex = (galleryIndex + 1) % totalSlides;
+            goToSlide(galleryIndex);
+        }
+
+        function galleryPrev() {
+            if(totalSlides === 0) return;
+            galleryIndex = (galleryIndex - 1 + totalSlides) % totalSlides;
+            goToSlide(galleryIndex);
+        }
+
+        function updateDots() {
+            if (!galleryDotsContainer) return;
+            galleryDotsContainer.querySelectorAll('.gallery-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === galleryIndex);
+            });
+        }
+
+        // Auto-slide every 5 seconds
+        if(totalSlides > 0) {
+            let galleryAutoPlay = setInterval(galleryNext, 5000);
+            const carouselEl = document.getElementById('galleryCarousel');
+            if (carouselEl) {
+                carouselEl.addEventListener('mouseenter', () => clearInterval(galleryAutoPlay));
+                carouselEl.addEventListener('mouseleave', () => {
+                    galleryAutoPlay = setInterval(galleryNext, 5000);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
